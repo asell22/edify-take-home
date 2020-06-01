@@ -1,7 +1,6 @@
 const key = '61kzMj4j2v9qbl0uKSVFhu5zDwo78gs7DpmzZim0bhS3VUGAI3';
 const secret = 'SxgikrMVJ7ROxf9KsnrJYmdpstlJZKkzSI9P52uh';
-let token;
-let animals;
+
 const getToken = async () => {
   const response = await fetch('https://api.petfinder.com/v2/oauth2/token', {
     method: 'POST',
@@ -44,79 +43,103 @@ const handleFavorite = (icon) => {
   }
 };
 
+const handleShow = (animal) => {
+  let img;
+  if (animal.photos[1]) {
+    img = animal.photos[1].medium;
+  } else {
+    img = animal.photos[0].medium;
+  }
+  document.querySelector('.modal-header').textContent = `Meet ${animal.name}`;
+  document.querySelector('.img-container').innerHTML = `<img src=${img} />`;
+  document.querySelector(
+    '.url-btn'
+  ).innerHTML = `<a href=${animal.url} target="_blank" style="color: white">Meet on Petfinder</a> `;
+  document.querySelector('.modal-desc').innerHTML = `
+
+    <h3>Attributes</h3>
+    <ul style="padding: 0; list-style-type: none">
+      <li><strong>Breed:</strong><span> ${animal.breeds.primary}</span></li>
+      <li><strong>Color:</strong><span> ${animal.colors.primary}</span></li>
+      <li><strong>Gender:</strong><span> ${animal.gender}</span></li>
+      <li><strong>Size:</strong><span> ${animal.size}</span></li>
+      <li><strong>Declawed:</strong> <span>${
+        animal.attributes.declawed ? 'Yes' : 'No'
+      }</span></li>
+      <li><strong>House Trained:</strong> <span>${
+        animal.attributes.house_trained ? 'Yes' : 'No'
+      }</span></li>
+      <li><strong>Received Shots:</strong> <span>${
+        animal.attributes.shots_current ? 'Yes' : 'No'
+      }</span></li>
+      <li><strong>Neutered:</strong> <span>${
+        animal.attributes.spayed_neutered ? 'Yes' : 'No'
+      }</span></li>
+      <li><strong>Special Needs:</strong> <span>${
+        animal.attributes.special_needs ? 'Yes' : 'No'
+      }</span></li>
+    </ul>
+    `;
+  $('#modal').modal('show');
+  console.log(animal);
+};
+
 // const mainFunction = async () => {
 //   const result = await getToken();
 //   return result;
 // };
 
 (async () => {
+  let token;
+  let animals;
+  let selectedAnimal;
+
   token = await getToken();
   console.log(token);
   console.log('hello?');
   animals = await getAnimals(token.access_token);
   console.log('animals:', animals);
-  var app = document.querySelector('#list');
-  app.innerHTML =
-    '<div class="ui link cards">' +
-    animals.animals
-      .filter((animal) => animal.photos[0] != undefined)
-      .map(function (animal) {
-        return ` <div class="card">
+  const app = document.querySelector('#list');
+  const cardsContainer = document.createElement('div');
+  cardsContainer.classList.add('ui', 'link', 'cards');
+  app.append(cardsContainer);
+
+  animals.animals
+    .filter((animal) => animal.photos[0] != undefined)
+    .map((animal) => {
+      const card = document.createElement('div');
+      card.classList.add('card');
+      card.addEventListener('click', () => {
+        handleShow(animal);
+      });
+      card.innerHTML = `
         <img src=${animal.photos[0].medium} height="260" style="background-size:contain">
         <div class="content">
           <div class="header">${animal.name}</div>
         </div>
         <div class="extra content">
-          <span class="right floated star">
+        <span class="right floated star">
           <i class="star icon" onclick="handleFavorite(this)"></i>
-            Favorite
-          </span>
-        </div>
-      </div>
-      `;
-      })
-      .join('') +
-    '</div>';
+          Favorite
+        </span>`;
+      cardsContainer.append(card);
+    });
+
+  const modal = document.createElement('div');
+  modal.classList.add('ui', 'modal', 'large');
+  modal.id = 'modal';
+  modal.innerHTML = `<i class="close icon"></i>
+       <div class="header modal-header">
+         Profile Picture
+       </div>
+       <div class="image content">
+         <div class="ui medium image img-container"></div>
+         <div class="description modal-desc"></div>
+       </div>
+       <div class="actions">
+         <div class="ui violet button url-btn">
+          
+         </div>
+       </div>`;
+  cardsContainer.append(modal);
 })();
-// token = mainFunction();
-// console.log('token:', token);
-// fetch('https://api.petfinder.com/v2/oauth2/token', {
-//   method: 'POST',
-//   body:
-//     'grant_type=client_credentials&client_id=' +
-//     key +
-//     '&client_secret=' +
-//     secret,
-//   headers: {
-//     'Content-Type': 'application/x-www-form-urlencoded',
-//   },
-// })
-//   .then(function (resp) {
-//     // Return the response as JSON
-//     return resp.json();
-//   })
-//   .then(function (data) {
-//     // Log the API data
-//     token = data.access_token;
-//   })
-//   .catch(function (err) {
-//     // Log any errors
-//     console.log('something went wrong', err);
-//   });
-
-// console.log('token', token);
-
-//  fetch('https://api.petfinder.com/v2/animals', {
-//     method: 'POST', // *GET, POST, PUT, DELETE, etc.
-//     mode: 'cors', // no-cors, *cors, same-origin
-//     cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-//     credentials: 'same-origin', // include, *same-origin, omit
-//     headers: {
-//       'Content-Type': 'application/json',
-//       'Authorization': 'Bearer '
-//       // 'Content-Type': 'application/x-www-form-urlencoded',
-//     },
-//     redirect: 'follow', // manual, *follow, error
-//     referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-//     body: JSON.stringify(data), // body data type must match "Content-Type" header
-//   });
