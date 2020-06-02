@@ -133,8 +133,13 @@ const makeAnimalList = (animals) => {
          </div>
        </div>`;
   cardsContainer.append(modal);
+  stopSpinner();
 };
 
+const stopSpinner = () => {
+  document.getElementById('loader').classList.add('disabled');
+  document.getElementById('dimmer').classList.remove('active');
+};
 // const mainFunction = async () => {
 //   const result = await getToken();
 //   return result;

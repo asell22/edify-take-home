@@ -15,11 +15,16 @@
   </head>
 
   <body>
-    <h1>Black Cats - Los Angeles</h1>
-    <div class="ui buttons">
-      <button class="ui button" data-gender-type="male">Male</button>
-      <button class="ui button" data-gender-type="female">Female</button>
-      <button class="ui button active" data-gender-type="all">All</button>
+    <div class="ui grid">
+      <h1 class="twelve wide column">Black Cats - Los Angeles</h1>
+      <div class="ui buttons four wide column">
+        <button class="ui button" data-gender-type="male">Male</button>
+        <button class="ui button" data-gender-type="female">Female</button>
+        <button class="ui button active" data-gender-type="all">All</button>
+      </div>
+    </div>
+    <div class="ui active dimmer" id="dimmer">
+      <div class="ui loader" id="loader"></div>
     </div>
     <div id="list"></div>
   </body>
