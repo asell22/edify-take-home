@@ -33,14 +33,6 @@
     return response.json();
   };
 
-  const handleFavorite = (icon) => {
-    if (icon.classList.contains('active')) {
-      icon.classList.remove('active');
-    } else {
-      icon.classList.add('active');
-    }
-  };
-
   const handleShow = (animal) => {
     let img;
     if (animal.photos[1]) {
@@ -109,7 +101,34 @@
     btn.classList.add('active');
   };
 
+  const handleFavorite = (event, icon) => {
+    console.log(JSON.parse(localStorage.getItem('favIds')));
+    event.stopPropagation();
+    const favId = event.target.dataset.favId;
+    const favIds = JSON.parse(localStorage.getItem('favIds'));
+    if (favIds.includes(favId)) {
+      icon.classList.remove('active');
+
+      localStorage.setItem(
+        'favIds',
+        JSON.stringify(favIds.filter((id) => id !== favId))
+      );
+    } else {
+      icon.classList.add('active');
+      localStorage.setItem('favIds', JSON.stringify([...favIds, favId]));
+    }
+    console.log(JSON.parse(localStorage.getItem('favIds')));
+  };
+
+  setFavoriteHandlers = () => {
+    const favIcons = document.getElementsByClassName('star icon');
+    Array.prototype.forEach.call(favIcons, (icon) => {
+      icon.addEventListener('click', (evt) => handleFavorite(evt, icon));
+    });
+  };
+
   const makeAnimalCards = (animals) => {
+    const favIds = JSON.parse(localStorage.getItem('favIds'));
     const app = document.querySelector('#list');
     const cardsContainer = document.createElement('div');
     cardsContainer.classList.add('ui', 'link', 'cards');
@@ -121,6 +140,9 @@
       card.addEventListener('click', () => {
         handleShow(animal);
       });
+      const iconClass = favIds.includes(animal.id.toString())
+        ? 'star icon active'
+        : 'star icon';
       card.innerHTML = `
           <img src=${animal.photos[0].medium} height="260" style="background-size:contain">
           <div class="content">
@@ -128,11 +150,12 @@
           </div>
           <div class="extra content">
           <span class="right floated star">
-            <i class="star icon" onclick="handleFavorite(this)"></i>
+            <i class="${iconClass}" data-fav-id=${animal.id}></i>
             Favorite
           </span>`;
       cardsContainer.append(card);
     });
+    setFavoriteHandlers();
   };
 
   const createModal = () => {
@@ -158,6 +181,7 @@
     document.getElementById('loader').classList.add('disabled');
     document.getElementById('dimmer').classList.remove('active');
   };
+
   const mainFunction = async () => {
     const key = '61kzMj4j2v9qbl0uKSVFhu5zDwo78gs7DpmzZim0bhS3VUGAI3';
     const secret = 'SxgikrMVJ7ROxf9KsnrJYmdpstlJZKkzSI9P52uh';
@@ -178,5 +202,9 @@
     stopSpinner();
   };
 
+  if (!localStorage.getItem('favIds')) {
+    const favIds = [];
+    localStorage.setItem('favIds', JSON.stringify(favIds));
+  }
   mainFunction();
 })();
