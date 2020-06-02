@@ -84,6 +84,26 @@ const handleShow = (animal) => {
   console.log(animal);
 };
 
+const setFilterButtonListeners = (btns, males, females, animals) => {
+  Array.prototype.forEach.call(btns, (btn) => {
+    btn.addEventListener('click', (evt) => {
+      setActive(btns, btn);
+      document.querySelector('#list').innerHTML = '';
+      switch (evt.target.dataset.genderType) {
+        case 'male':
+          makeAnimalCards(males);
+          break;
+        case 'female':
+          makeAnimalCards(females);
+          break;
+        default:
+          makeAnimalCards(animals);
+          break;
+      }
+    });
+  });
+};
+
 const setActive = (collection, btn) => {
   Array.prototype.forEach.call(collection, (btn) => {
     btn.classList.remove('active');
@@ -91,7 +111,7 @@ const setActive = (collection, btn) => {
   btn.classList.add('active');
 };
 
-const makeAnimalList = (animals) => {
+const makeAnimalCards = (animals) => {
   const app = document.querySelector('#list');
   const cardsContainer = document.createElement('div');
   cardsContainer.classList.add('ui', 'link', 'cards');
@@ -115,37 +135,33 @@ const makeAnimalList = (animals) => {
         </span>`;
     cardsContainer.append(card);
   });
+};
 
+const createModal = () => {
   const modal = document.createElement('div');
   modal.classList.add('ui', 'modal', 'large');
   modal.id = 'modal';
-  modal.innerHTML = `<i class="close icon"></i>
-       <div class="header modal-header">
-         Profile Picture
-       </div>
-       <div class="image content">
-         <div class="ui medium image img-container"></div>
-         <div class="description modal-desc"></div>
-       </div>
-       <div class="actions">
-         <div class="ui violet button url-btn">
-          
-         </div>
-       </div>`;
-  cardsContainer.append(modal);
-  stopSpinner();
+  modal.innerHTML = `
+    <i class="close icon"></i>
+    <div class="header modal-header">
+      Profile Picture
+    </div>
+    <div class="image content">
+      <div class="ui medium image img-container"></div>
+      <div class="description modal-desc"></div>
+    </div>
+    <div class="actions">
+      <div class="ui violet button url-btn"></div>
+    </div>`;
+  document.querySelector('body').append(modal);
 };
 
 const stopSpinner = () => {
   document.getElementById('loader').classList.add('disabled');
   document.getElementById('dimmer').classList.remove('active');
 };
-// const mainFunction = async () => {
-//   const result = await getToken();
-//   return result;
-// };
 
-(async () => {
+const mainFunction = async () => {
   let token = await getToken();
   let response = await getAnimals(token.access_token);
 
@@ -153,28 +169,15 @@ const stopSpinner = () => {
     (animal) => animal.photos[0] != undefined
   );
   const males = animals.filter((animal) => animal.gender === 'Male');
-  console.log('males:', males);
   const females = animals.filter((animal) => animal.gender === 'Female');
-  console.log('females:', females);
-  console.log('animals:', animals);
-
   const btns = document.querySelectorAll('.ui.buttons > .ui.button');
-  Array.prototype.forEach.call(btns, (btn) => {
-    btn.addEventListener('click', (evt) => {
-      setActive(btns, btn);
-      document.querySelector('#list').innerHTML = '';
-      switch (evt.target.dataset.genderType) {
-        case 'male':
-          makeAnimalList(males);
-          break;
-        case 'female':
-          makeAnimalList(females);
-          break;
-        default:
-          makeAnimalList(animals);
-          break;
-      }
-    });
-  });
-  makeAnimalList(animals);
+
+  setFilterButtonListeners(btns, males, females, animals);
+  makeAnimalCards(animals);
+  createModal();
+  stopSpinner();
+};
+
+(() => {
+  mainFunction();
 })();
