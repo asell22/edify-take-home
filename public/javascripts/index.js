@@ -84,35 +84,26 @@ const handleShow = (animal) => {
   console.log(animal);
 };
 
-// const mainFunction = async () => {
-//   const result = await getToken();
-//   return result;
-// };
+const setActive = (collection, btn) => {
+  Array.prototype.forEach.call(collection, (btn) => {
+    btn.classList.remove('active');
+  });
+  btn.classList.add('active');
+};
 
-(async () => {
-  let token;
-  let animals;
-  let selectedAnimal;
-
-  token = await getToken();
-  console.log(token);
-  console.log('hello?');
-  animals = await getAnimals(token.access_token);
-  console.log('animals:', animals);
+const makeAnimalList = (animals) => {
   const app = document.querySelector('#list');
   const cardsContainer = document.createElement('div');
   cardsContainer.classList.add('ui', 'link', 'cards');
   app.append(cardsContainer);
 
-  animals.animals
-    .filter((animal) => animal.photos[0] != undefined)
-    .map((animal) => {
-      const card = document.createElement('div');
-      card.classList.add('card');
-      card.addEventListener('click', () => {
-        handleShow(animal);
-      });
-      card.innerHTML = `
+  animals.map((animal) => {
+    const card = document.createElement('div');
+    card.classList.add('card');
+    card.addEventListener('click', () => {
+      handleShow(animal);
+    });
+    card.innerHTML = `
         <img src=${animal.photos[0].medium} height="260" style="background-size:contain">
         <div class="content">
           <div class="header">${animal.name}</div>
@@ -122,8 +113,8 @@ const handleShow = (animal) => {
           <i class="star icon" onclick="handleFavorite(this)"></i>
           Favorite
         </span>`;
-      cardsContainer.append(card);
-    });
+    cardsContainer.append(card);
+  });
 
   const modal = document.createElement('div');
   modal.classList.add('ui', 'modal', 'large');
@@ -142,4 +133,43 @@ const handleShow = (animal) => {
          </div>
        </div>`;
   cardsContainer.append(modal);
+};
+
+// const mainFunction = async () => {
+//   const result = await getToken();
+//   return result;
+// };
+
+(async () => {
+  let token = await getToken();
+  let response = await getAnimals(token.access_token);
+
+  const animals = response.animals.filter(
+    (animal) => animal.photos[0] != undefined
+  );
+  const males = animals.filter((animal) => animal.gender === 'Male');
+  console.log('males:', males);
+  const females = animals.filter((animal) => animal.gender === 'Female');
+  console.log('females:', females);
+  console.log('animals:', animals);
+
+  const btns = document.querySelectorAll('.ui.buttons > .ui.button');
+  Array.prototype.forEach.call(btns, (btn) => {
+    btn.addEventListener('click', (evt) => {
+      setActive(btns, btn);
+      document.querySelector('#list').innerHTML = '';
+      switch (evt.target.dataset.genderType) {
+        case 'male':
+          makeAnimalList(males);
+          break;
+        case 'female':
+          makeAnimalList(females);
+          break;
+        default:
+          makeAnimalList(animals);
+          break;
+      }
+    });
+  });
+  makeAnimalList(animals);
 })();
