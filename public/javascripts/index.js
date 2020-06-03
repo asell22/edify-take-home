@@ -1,4 +1,5 @@
 (() => {
+  let favorites;
   const getToken = async (key, secret) => {
     const response = await fetch('https://api.petfinder.com/v2/oauth2/token', {
       method: 'POST',
@@ -33,6 +34,47 @@
     return response.json();
   };
 
+  const getAnimalAttributesTemplate = (animal) => {
+    return `
+    <div class="ui grid" style="padding-left: 25px">
+      <div class="five wide column">
+        <h3>Attributes</h3>
+        <ul style="padding: 0; list-style-type: none">
+          <li><strong>Breed:</strong><span> ${animal.breeds.primary}</span></li>
+          <li><strong>Color:</strong><span> ${animal.colors.primary}</span></li>
+          <li><strong>Gender:</strong><span> ${animal.gender}</span></li>
+          <li><strong>Size:</strong><span> ${animal.size}</span></li>
+          <li><strong>Declawed:</strong> <span>${
+            animal.attributes.declawed ? 'Yes' : 'No'
+          }</span></li>
+          <li><strong>House Trained:</strong> <span>${
+            animal.attributes.house_trained ? 'Yes' : 'No'
+          }</span></li>
+          <li><strong>Received Shots:</strong> <span>${
+            animal.attributes.shots_current ? 'Yes' : 'No'
+          }</span></li>
+          <li><strong>Neutered:</strong> <span>${
+            animal.attributes.spayed_neutered ? 'Yes' : 'No'
+          }</span></li>
+          <li><strong>Special Needs:</strong> <span>${
+            animal.attributes.special_needs ? 'Yes' : 'No'
+          }</span></li>
+        </ul>
+      </div>
+      <div class="eight wide column">
+        <h3>Contact Info</h3>
+        <ul style="padding: 0; list-style-type: none">
+          <li><strong>Email:</strong> <span>${
+            animal.contact.email ? animal.contact.email : 'None listed'
+          }</span></li>
+          <li><strong>Phone:</strong> <span>${
+            animal.contact.phone ? animal.contact.phone : 'None listed'
+          }</span></li>
+        </ul>
+    </div>
+    `;
+  };
+
   const handleShow = (animal) => {
     let img;
     if (animal.photos[1]) {
@@ -41,35 +83,15 @@
       img = animal.photos[0].medium;
     }
     document.querySelector('.modal-header').textContent = `Meet ${animal.name}`;
-    document.querySelector('.img-container').innerHTML = `<img src=${img} />`;
+    document.querySelector(
+      '.img-container'
+    ).innerHTML = `<img src=${img} height="240" width="250" style="object-fit:cover;"/>`;
     document.querySelector(
       '.url-btn'
     ).innerHTML = `<a href=${animal.url} target="_blank" style="color: white">Meet on Petfinder</a> `;
-    document.querySelector('.modal-desc').innerHTML = `
-  
-      <h3>Attributes</h3>
-      <ul style="padding: 0; list-style-type: none">
-        <li><strong>Breed:</strong><span> ${animal.breeds.primary}</span></li>
-        <li><strong>Color:</strong><span> ${animal.colors.primary}</span></li>
-        <li><strong>Gender:</strong><span> ${animal.gender}</span></li>
-        <li><strong>Size:</strong><span> ${animal.size}</span></li>
-        <li><strong>Declawed:</strong> <span>${
-          animal.attributes.declawed ? 'Yes' : 'No'
-        }</span></li>
-        <li><strong>House Trained:</strong> <span>${
-          animal.attributes.house_trained ? 'Yes' : 'No'
-        }</span></li>
-        <li><strong>Received Shots:</strong> <span>${
-          animal.attributes.shots_current ? 'Yes' : 'No'
-        }</span></li>
-        <li><strong>Neutered:</strong> <span>${
-          animal.attributes.spayed_neutered ? 'Yes' : 'No'
-        }</span></li>
-        <li><strong>Special Needs:</strong> <span>${
-          animal.attributes.special_needs ? 'Yes' : 'No'
-        }</span></li>
-      </ul>
-      `;
+    document.querySelector(
+      '.modal-desc'
+    ).innerHTML = getAnimalAttributesTemplate(animal);
     $('#modal').modal('show');
     console.log(animal);
   };
@@ -94,6 +116,20 @@
     });
   };
 
+  const openFavorites = () => {
+    $('.sidebar')
+      .sidebar({
+        dimPage: false,
+        transition: 'overlay',
+      })
+      .sidebar('toggle');
+  };
+
+  const setFavoritesBtnListener = () => {
+    const favoritesButton = document.querySelector('#favorites-btn');
+    favoritesButton.addEventListener('click', openFavorites);
+  };
+
   const setActive = (collection, btn) => {
     Array.prototype.forEach.call(collection, (btn) => {
       btn.classList.remove('active');
@@ -105,19 +141,27 @@
     console.log(JSON.parse(localStorage.getItem('favIds')));
     event.stopPropagation();
     const favId = event.target.dataset.favId;
-    const favIds = JSON.parse(localStorage.getItem('favIds'));
+    console.log('favId:', favId);
+    const favName = event.target.dataset.favName;
+    console.log('favName:', favName);
+
+    const favs = JSON.parse(localStorage.getItem('favs'));
+    const favIds = favs.map((fav) => fav.id);
     if (favIds.includes(favId)) {
       icon.classList.remove('active');
 
       localStorage.setItem(
-        'favIds',
-        JSON.stringify(favIds.filter((id) => id !== favId))
+        'favs',
+        JSON.stringify(favs.filter((fav) => fav.id !== favId))
       );
     } else {
       icon.classList.add('active');
-      localStorage.setItem('favIds', JSON.stringify([...favIds, favId]));
+      localStorage.setItem(
+        'favs',
+        JSON.stringify([...favs, { id: favId, name: favName }])
+      );
     }
-    console.log(JSON.parse(localStorage.getItem('favIds')));
+    console.log(JSON.parse(localStorage.getItem('favs')));
   };
 
   setFavoriteHandlers = () => {
@@ -128,7 +172,8 @@
   };
 
   const makeAnimalCards = (animals) => {
-    const favIds = JSON.parse(localStorage.getItem('favIds'));
+    const favs = JSON.parse(localStorage.getItem('favs'));
+    const favIds = favs.map((fav) => fav.id);
     const app = document.querySelector('#list');
     const cardsContainer = document.createElement('div');
     cardsContainer.classList.add('ui', 'link', 'cards');
@@ -144,13 +189,13 @@
         ? 'star icon active'
         : 'star icon';
       card.innerHTML = `
-          <img src=${animal.photos[0].medium} height="260" style="background-size:contain">
+          <img src=${animal.photos[0].medium} height="260" style="object-fit: cover">
           <div class="content">
             <div class="header">${animal.name}</div>
           </div>
           <div class="extra content">
           <span class="right floated star">
-            <i class="${iconClass}" data-fav-id=${animal.id}></i>
+            <i class="${iconClass}" data-fav-id=${animal.id} data-fav-name=${animal.name}></i>
             Favorite
           </span>`;
       cardsContainer.append(card);
@@ -168,7 +213,7 @@
         Profile Picture
       </div>
       <div class="image content">
-        <div class="ui medium image img-container"></div>
+        <div class="img-container" style="border: 1px solid #ccc;"></div>
         <div class="description modal-desc"></div>
       </div>
       <div class="actions">
@@ -192,19 +237,21 @@
     const animals = response.animals.filter(
       (animal) => animal.photos[0] != undefined
     );
+
     const males = animals.filter((animal) => animal.gender === 'Male');
     const females = animals.filter((animal) => animal.gender === 'Female');
     const btns = document.querySelectorAll('.ui.buttons > .ui.button');
 
     setFilterButtonListeners(btns, males, females, animals);
+    setFavoritesBtnListener();
     makeAnimalCards(animals);
     createModal();
     stopSpinner();
   };
 
-  if (!localStorage.getItem('favIds')) {
-    const favIds = [];
-    localStorage.setItem('favIds', JSON.stringify(favIds));
+  if (!localStorage.getItem('favs')) {
+    const favs = [];
+    localStorage.setItem('favs', JSON.stringify(favs));
   }
   mainFunction();
 })();

@@ -1,12 +1,12 @@
-body {
-  padding: 50px;
-  /* font: 14px 'Lucida Grande', Helvetica, Arial, sans-serif; */
-}
-
 a {
   color: #00b7ff;
+}
+.ui.visible.right.overlay.sidebar {
+  color: #321b65;
+  background-color: #fff;
 }
 
 .ui.button.violet.active {
   background-color: #321b65;
+  color: #fff;
 }

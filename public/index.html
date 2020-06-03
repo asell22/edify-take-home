@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>Express</title>
+    <title>Cats</title>
     <script
       src="https://code.jquery.com/jquery-3.1.1.min.js"
       crossorigin="anonymous"
@@ -15,21 +15,36 @@
   </head>
 
   <body>
-    <div class="ui grid">
-      <h1 class="twelve wide column">Black Cats - Los Angeles</h1>
-      <div class="ui buttons four wide column">
-        <button class="ui violet button" data-gender-type="male">Male</button>
-        <button class="ui violet button" data-gender-type="female">
-          Female
-        </button>
-        <button class="ui violet button active" data-gender-type="all">
-          All
-        </button>
+    <div class="ui right wide sidebar">
+      Whatever
+    </div>
+    <div class="pusher">
+      <div class="ui padded container" style="margin-top: 20px;">
+        <div class="ui grid">
+          <h1 class="eight wide column">Black Cats - Los Angeles</h1>
+          <div class="four wide column">
+            <div class="ui buttons">
+              <button class="ui violet button" data-gender-type="male">
+                Male
+              </button>
+              <button class="ui violet button" data-gender-type="female">
+                Female
+              </button>
+              <button class="ui violet button active" data-gender-type="all">
+                All
+              </button>
+            </div>
+          </div>
+          <div class="three wide column">
+            <button class="ui button" id="favorites-btn">Favorites</button>
+          </div>
+        </div>
+        <div id="list"></div>
+      </div>
+
+      <div class="ui active dimmer" id="dimmer">
+        <div class="ui loader" id="loader"></div>
       </div>
     </div>
-    <div class="ui active dimmer" id="dimmer">
-      <div class="ui loader" id="loader"></div>
-    </div>
-    <div id="list"></div>
   </body>
 </html>
