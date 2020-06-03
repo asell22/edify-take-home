@@ -138,13 +138,15 @@
   };
 
   const handleFavorite = (event, icon) => {
+    console.log(event);
     console.log(JSON.parse(localStorage.getItem('favIds')));
     event.stopPropagation();
+    console.log();
     const favId = event.target.dataset.favId;
     console.log('favId:', favId);
     const favName = event.target.dataset.favName;
     console.log('favName:', favName);
-
+    const favUrl = event.target.dataset.favUrl;
     const favs = JSON.parse(localStorage.getItem('favs'));
     const favIds = favs.map((fav) => fav.id);
     if (favIds.includes(favId)) {
@@ -158,10 +160,34 @@
       icon.classList.add('active');
       localStorage.setItem(
         'favs',
-        JSON.stringify([...favs, { id: favId, name: favName }])
+        JSON.stringify([...favs, { id: favId, name: favName, url: favUrl }])
       );
     }
-    console.log(JSON.parse(localStorage.getItem('favs')));
+    // console.log(JSON.parse(localStorage.getItem('favs')));
+    setFavoritesList(JSON.parse(localStorage.getItem('favs')));
+  };
+
+  setFavoritesList = (list) => {
+    console.log('list:', list);
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.innerHTML = `<h3 style="text-align: center; margin-top: 15px;">Favorites</h3>`;
+    if (list.length) {
+      const ul = document.createElement('ul');
+      // ul.innerHTML = ;
+      ul.style.listStyleType = 'none';
+      list.map((animal) => {
+        const animalLi = document.createElement('li');
+        animalLi.innerHTML = `<a href=${animal.url} target="_blank">${animal.name}</a>`;
+        ul.append(animalLi);
+      });
+      sidebar.append(ul);
+    } else {
+      const p = document.createElement('p');
+      p.textContent =
+        'You currently have no favorite cats. Click on the star icon to seelect a favorite cat.';
+      p.style.padding = '15px';
+      sidebar.append(p);
+    }
   };
 
   setFavoriteHandlers = () => {
@@ -195,7 +221,10 @@
           </div>
           <div class="extra content">
           <span class="right floated star">
-            <i class="${iconClass}" data-fav-id=${animal.id} data-fav-name=${animal.name}></i>
+            <i class="${iconClass}" 
+              data-fav-id=${animal.id} 
+              data-fav-name=${animal.name} 
+              data-fav-url=${animal.url}></i>
             Favorite
           </span>`;
       cardsContainer.append(card);
@@ -246,6 +275,7 @@
     setFavoritesBtnListener();
     makeAnimalCards(animals);
     createModal();
+    setFavoritesList(JSON.parse(localStorage.getItem('favs')));
     stopSpinner();
   };
 
