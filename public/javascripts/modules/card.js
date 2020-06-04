@@ -1,4 +1,5 @@
 import { handleShow } from './modal.js';
+import { setFavorites } from './favorite.js';
 
 export const makeAnimalCards = (animals) => {
   const favs = JSON.parse(localStorage.getItem('favs'));
@@ -32,4 +33,5 @@ export const makeAnimalCards = (animals) => {
         </span>`;
     cardsContainer.append(card);
   });
+  setFavorites();
 };

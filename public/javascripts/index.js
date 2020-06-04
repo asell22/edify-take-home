@@ -1,7 +1,6 @@
 import { getAnimals } from './modules/api.js';
 import { setFilterButtonListeners } from './modules/filter.js';
 import { makeAnimalCards } from './modules/card.js';
-import { setFavorites } from './modules/favorite.js';
 import { createModal } from './modules/modal.js';
 
 (() => {
@@ -14,7 +13,6 @@ import { createModal } from './modules/modal.js';
     const animals = await getAnimals();
     setFilterButtonListeners(animals);
     makeAnimalCards(animals);
-    setFavorites();
     createModal();
     stopSpinner();
   };
