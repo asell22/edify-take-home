@@ -9,4 +9,4 @@
 3. Install dependencies **npm i**
 4. Run app **npm start**
 
-**Note: this application has es6 modules - which are not yet supported in IE. I recommend using Chrome for the browser when running app locally.**
+**Note: this application has es6 modules - which are not yet supported in IE. I recommend using Chrome when running app locally.**
